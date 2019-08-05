@@ -1,8 +1,6 @@
 import React from "react";
-import ReactDom from "react-dom";
-import 'bootstrap/dist/css/bootstrap.css';
+import ReactDOM from "react-dom";
+import "bootstrap/dist/css/bootstrap.css";
+import Todo from "./components/toDo";
 
-
-const element = <h1>hello world</h1>;
-
-console.log(element);
+ReactDOM.render(<Todo/>, document.getElementById("root"));
