@@ -7,34 +7,43 @@ import Header from "./header";
 class Todo extends Component {
   state = {
     tasks: [],
-    editmode: false,
-    toBeEdited: ""
+    editMode: false,
+    toBeEdited: undefined,
+    id: 0
   };
   toggleEditMode = mode => {
-    this.setState({ editmode: mode });
-    console.log(this.state.toBeEdited + " to be edited");
+    this.setState({ editMode: mode });
+    console.log(`${JSON.stringify(this.state.toBeEdited)}  to be edited`);
   };
 
-  handleAddTask = newTask => {
-    if (newTask === "") {
+  handleAddTask = newTaskValue => {
+    if (newTaskValue === "") {
       alert("Please enter a valid task");
       return;
     }
-    if (this.state.tasks.includes(newTask)) {
-      alert("You have already written this task");
-      return;
-    }
     this.setState(state => {
-      const tasks = state.tasks.concat(newTask);
-
-      return { newTask: "", tasks, value: "" };
+      const tasks = state.tasks.concat({
+        id: this.state.id,
+        value: newTaskValue
+      });
+      return { newTask: "", tasks, value: "", id: this.state.id + 1 };
     });
   };
-  handleDeleteTask = task => {
-    let abbr = this.state;
-    let ind = abbr.tasks.indexOf(task);
+  findTaskWithValue = value => {
+    let abbr = this.state.tasks;
+    return abbr.find(element => element.value === value);
+  };
+  findTaskWithId = Id => {
+    let abbr = this.state.tasks;
+    return abbr.find(element => element.id === Id);
+  };
+  handleDeleteTask = taskId => {
+    let abbr = this.state.tasks;
+    let findTask = this.findTaskWithId(taskId);
+    let ind = abbr.indexOf(findTask);
     this.setState(state => {
       state.confirm = false;
+      state.editMode = false;
       const remainingTasks = state.tasks.splice(ind, 1);
 
       return {
@@ -44,22 +53,28 @@ class Todo extends Component {
   };
 
   setEditTask = task => {
-    this.setState({ toBeEdited: task });
+    console.log(`${JSON.stringify(task)} set edit`);
+    this.setState({ toBeEdited: task, editMode: true });
   };
-  handleEditTask = task => {
-    if (!this.state.tasks.includes(task) && task !== "") {
-      this.handleDeleteTask(this.state.toBeEdited);
-      this.handleAddTask(task);
-    } else if (task === "") {
+  handleEditTask = taskValue => {
+    if (taskValue !== "") {
+      console.log("control point");
+
+      let idholder = this.state.toBeEdited.id;
+      let newtasksarray = [...this.state.tasks];
+      let index = this.state.tasks.indexOf(this.state.toBeEdited);
+      newtasksarray[index] = { id: idholder, value: taskValue };
+      this.setState({ tasks: newtasksarray });
+      // this.handleDeleteTask(this.state.toBeEdited.id);
+      // this.handleAddTask(taskValue);
+    } else if (taskValue === "") {
       alert("You entered an empty task");
-    } else if (this.state.tasks.includes(task)) {
-      alert("You Already have this task");
     }
 
-    this.setState({ toBeEdited: "", editmode: false });
+    this.setState({ toBeEdited: undefined, editMode: false });
   };
   cancelEdit = () => {
-    this.setState({ toBeEdited: "", editmode: false });
+    this.setState({ toBeEdited: undefined, editMode: false });
   };
   render() {
     return (
@@ -67,8 +82,8 @@ class Todo extends Component {
         <Header />
         <AddTask
           addNew={this.handleAddTask}
-          edit={this.state.toBeEdited}
-          mode={this.state.editmode}
+          taskToBeEdited={this.state.toBeEdited}
+          isEditMode={this.state.editMode}
           completeEdit={this.handleEditTask}
           cancel={this.cancelEdit}
         />

@@ -5,73 +5,75 @@ class AddTask extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      editTextId: null,
       newTask: "",
       editText: "",
       propsNotCopied: true
     };
   } /*
   componentDidUpdate = prevProps => {
-    if (this.props.edit !== prevProps.edit) {
-      this.setState({ editText: this.props.edit });
+    if (
+      this.props.taskToBeEdited !== prevProps.taskToBeEdited &&
+      this.props.isEditMode
+    ) {
+      this.setState({ editText: this.props.taskToBeEdited.value });
     }
   };*/
+
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.edit !== prevState.editText && prevState.propsNotCopied) {
-      return { editText: nextProps.edit, propsNotCopied: false };
+    if (
+      (!prevState.editText ||
+        nextProps.taskToBeEdited.id !== prevState.editTextId) &&
+      nextProps.taskToBeEdited &&
+      nextProps.isEditMode
+    ) {
+      return {
+        editText: nextProps.taskToBeEdited.value,
+        editTextId: nextProps.taskToBeEdited.id
+      };
     }
     return null;
   }
-  handleInputTask = event => {
+  handleInput = event => {
     this.setState({ newTask: event.target.value });
   };
-  handleEditTask = event => {
+  handleEdit = event => {
     this.setState({ editText: event.target.value });
   };
-  handleAddTask = () => {
+  handleAdd = () => {
     this.props.addNew(this.state.newTask);
     this.setState({ newTask: "" });
   };
   finishEdit = () => {
-    this.setState({ newTask: "", editText: "", propsNotCopied: true });
     this.props.completeEdit(this.state.editText);
+    this.setState({ newTask: "", editText: "", propsNotCopied: true });
   };
   cancelEditing = () => {
-    this.setState({ newTask: "", editText: "", propsNotCopied: true });
     this.props.cancel();
+    this.setState({ newTask: "", editText: "", propsNotCopied: true });
   };
 
   render() {
     return (
       <div className="divv">
-        {this.props.mode === false && (
-          <input
-            className="inputarea"
-            type="text"
-            value={this.state.newTask}
-            name="newTask"
-            onChange={this.handleInputTask}
-          />
-        )}
-        {this.props.mode === true && (
-          <input
-            className="inputarea"
-            type="text"
-            value={this.state.editText}
-            name="editTask"
-            onChange={this.handleEditTask}
-          />
-        )}
-        {!this.props.mode && (
-          <button className="button" onClick={() => this.handleAddTask()}>
+        <input
+          className="inputarea"
+          type="text"
+          value={this.state[this.props.isEditMode ? "editText" : "newTask"]}
+          onChange={this.props.isEditMode ? this.handleEdit : this.handleInput}
+        />
+
+        {!this.props.isEditMode && (
+          <button className="button" onClick={() => this.handleAdd()}>
             Add Task
           </button>
         )}
-        {this.props.mode && (
+        {this.props.isEditMode && (
           <button className="button" onClick={() => this.finishEdit()}>
             Edit Task
           </button>
         )}
-        {this.props.mode && (
+        {this.props.isEditMode && (
           <button className="button" onClick={() => this.cancelEditing()}>
             Cancel
           </button>
@@ -82,7 +84,7 @@ class AddTask extends Component {
 }
 AddTask.propTypes = {
   addNew: PropTypes.func,
-  edit: PropTypes.string,
+  edit: PropTypes.object,
   completeEdit: PropTypes.func,
   cancel: PropTypes.func
 };

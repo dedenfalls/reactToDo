@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import "./toDo.css";
 import PropTypes from "prop-types";
-
+import Task from "./task";
 class TaskList extends Component {
   state = {
     tasks: [],
@@ -12,7 +12,6 @@ class TaskList extends Component {
 
   handleEdit = task => {
     this.props.editTask(task);
-    this.props.toggleEdit(true);
   };
 
   handleConfirmationWindow = () => {
@@ -23,7 +22,6 @@ class TaskList extends Component {
     this.setState({ current: task, confirm: true });
   };
   handleDelete = () => {
-    this.props.toggleEdit(false);
     this.props.deleteTask(this.state.current);
     this.handleConfirmationWindow();
   };
@@ -36,11 +34,11 @@ class TaskList extends Component {
         )}
         <ul className="list">
           {this.props.enteredTask.map(task => (
-            <li key={task} className="innerlist">
-              {task}
+            <li key={task.id} className="innerlist">
+              <Task value={task.value} id={task.id} />
               <button
                 className="button"
-                onClick={() => this.handleConfirmationWindowWithTask(task)}
+                onClick={() => this.handleConfirmationWindowWithTask(task.id)}
               >
                 Delete
               </button>
