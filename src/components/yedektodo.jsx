@@ -8,11 +8,16 @@ class Todo extends Component {
   state = {
     tasks: [],
     editmode: false,
-    toBeEdited: ""
+    toBeEdited: "",
+    editing: ""
   };
+  shouldComponentUpdate = () => true;
   toggleEditMode = mode => {
     this.setState({ editmode: mode });
-    console.log(this.state.toBeEdited + " to be edited");
+  };
+
+  setEditing = task => {
+    this.setState({ editing: task });
   };
 
   handleAddTask = newTask => {
@@ -44,30 +49,33 @@ class Todo extends Component {
   };
 
   setEditTask = task => {
-    this.setState({ toBeEdited: task });
+    this.setState({ toBeEdited: task, editing: task });
   };
-  handleEditTask = task => {
-    if (!this.state.tasks.includes(task) && task !== "") {
+  handleEditTask = () => {
+    if (
+      !this.state.tasks.includes(this.state.editing) &&
+      this.state.editing !== ""
+    ) {
+      this.handleAddTask(this.state.editing);
       this.handleDeleteTask(this.state.toBeEdited);
-      this.handleAddTask(task);
-    } else if (task === "") {
-      alert("You entered an empty task");
-    } else if (this.state.tasks.includes(task)) {
-      alert("You Already have this task");
+    } else {
+      alert("You Already have this task or you entered an empty task");
     }
 
-    this.setState({ toBeEdited: "", editmode: false });
+    this.setState({ toBeEdited: "", editmode: false, editing: "" });
   };
   cancelEdit = () => {
-    this.setState({ toBeEdited: "", editmode: false });
+    this.setState({ toBeEdited: "", editmode: false, editing: "" });
   };
   render() {
     return (
       <React.Fragment>
         <Header />
         <AddTask
+          editing={this.state.editing}
+          toggle={this.toggleEditMode}
           addNew={this.handleAddTask}
-          edit={this.state.toBeEdited}
+          editFunc={this.setEditing}
           mode={this.state.editmode}
           completeEdit={this.handleEditTask}
           cancel={this.cancelEdit}
