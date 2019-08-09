@@ -28,8 +28,8 @@ class TaskList extends Component {
 
   render() {
     return (
-      <div>
-        {this.props.taskLength === 0 && (
+      <>
+        {this.props.enteredTask.length === 0 && (
           <p className="container">You have no task. Please add one</p>
         )}
         <ul className="list">
@@ -100,7 +100,7 @@ class TaskList extends Component {
             </div>
           </div>
         )}
-      </div>
+      </>
     );
   }
 }
@@ -108,7 +108,6 @@ class TaskList extends Component {
 TaskList.propTypes = {
   toggleEdit: PropTypes.func,
   enteredTask: PropTypes.array,
-  taskLength: PropTypes.number,
   deleteTask: PropTypes.func,
   editTask: PropTypes.func
 };

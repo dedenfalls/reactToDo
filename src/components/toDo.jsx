@@ -4,12 +4,13 @@ import "bootstrap/dist/css/bootstrap.css";
 import AddTask from "./addTask";
 import TaskList from "./taskList";
 import Header from "./header";
+import uuid from "uuid";
+
 class Todo extends Component {
   state = {
     tasks: [],
     editMode: false,
-    toBeEdited: undefined,
-    id: 0
+    toBeEdited: undefined
   };
   toggleEditMode = mode => {
     this.setState({ editMode: mode });
@@ -21,52 +22,36 @@ class Todo extends Component {
       alert("Please enter a valid task");
       return;
     }
-    this.setState(state => {
-      const tasks = state.tasks.concat({
-        id: this.state.id,
-        value: newTaskValue
-      });
-      return { newTask: "", tasks, value: "", id: this.state.id + 1 };
+    const { tasks } = this.state;
+    this.setState({
+      tasks: [...tasks, { id: uuid(), value: newTaskValue }]
     });
   };
-  findTaskWithValue = value => {
-    let abbr = this.state.tasks;
-    return abbr.find(element => element.value === value);
-  };
-  findTaskWithId = Id => {
-    let abbr = this.state.tasks;
-    return abbr.find(element => element.id === Id);
-  };
-  handleDeleteTask = taskId => {
-    let abbr = this.state.tasks;
-    let findTask = this.findTaskWithId(taskId);
-    let ind = abbr.indexOf(findTask);
-    this.setState(state => {
-      state.confirm = false;
-      state.editMode = false;
-      const remainingTasks = state.tasks.splice(ind, 1);
 
-      return {
-        remainingTasks
-      };
+  handleDeleteTask = taskId => {
+    const { tasks } = this.state;
+
+    const ind = tasks.findIndex(element => element.id === taskId);
+    // findIndex
+
+    this.setState({
+      confirm: false,
+      editMode: false,
+      remainingTasks: tasks.splice(ind, 1)
     });
   };
 
   setEditTask = task => {
-    console.log(`${JSON.stringify(task)} set edit`);
+    //console.log(`${JSON.stringify(task)} set edit`);
     this.setState({ toBeEdited: task, editMode: true });
   };
   handleEditTask = taskValue => {
     if (taskValue !== "") {
-      console.log("control point");
-
-      let idholder = this.state.toBeEdited.id;
+      const idholder = this.state.toBeEdited.id;
       let newtasksarray = [...this.state.tasks];
-      let index = this.state.tasks.indexOf(this.state.toBeEdited);
+      const index = this.state.tasks.indexOf(this.state.toBeEdited);
       newtasksarray[index] = { id: idholder, value: taskValue };
       this.setState({ tasks: newtasksarray });
-      // this.handleDeleteTask(this.state.toBeEdited.id);
-      // this.handleAddTask(taskValue);
     } else if (taskValue === "") {
       alert("You entered an empty task");
     }
@@ -91,7 +76,6 @@ class Todo extends Component {
         <TaskList
           toggleEdit={this.toggleEditMode}
           enteredTask={this.state.tasks}
-          taskLength={this.state.tasks.length}
           deleteTask={this.handleDeleteTask}
           editTask={this.setEditTask}
         />

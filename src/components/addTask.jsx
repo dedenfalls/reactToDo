@@ -4,11 +4,13 @@ import PropTypes from "prop-types";
 class AddTask extends Component {
   constructor(props) {
     super(props);
+    this.inputRef = React.createRef();
+
     this.state = {
       editTextId: null,
+
       newTask: "",
-      editText: "",
-      propsNotCopied: true
+      editText: ""
     };
   } /*
   componentDidUpdate = prevProps => {
@@ -19,7 +21,9 @@ class AddTask extends Component {
       this.setState({ editText: this.props.taskToBeEdited.value });
     }
   };*/
-
+  componentDidMount() {
+    this.inputRef.current.focus();
+  }
   static getDerivedStateFromProps(nextProps, prevState) {
     if (
       (!prevState.editText ||
@@ -43,14 +47,33 @@ class AddTask extends Component {
   handleAdd = () => {
     this.props.addNew(this.state.newTask);
     this.setState({ newTask: "" });
+    this.inputRef.current.focus();
   };
   finishEdit = () => {
     this.props.completeEdit(this.state.editText);
-    this.setState({ newTask: "", editText: "", propsNotCopied: true });
+    this.setState({ newTask: "", editText: "" });
+    this.inputRef.current.focus();
   };
   cancelEditing = () => {
     this.props.cancel();
-    this.setState({ newTask: "", editText: "", propsNotCopied: true });
+    this.setState({ editText: "" });
+    this.inputRef.current.focus();
+  };
+
+  handleInputKeyDown = event => {
+    if (event.key === "Enter") {
+      if (this.props.isEditMode) {
+        this.finishEdit(event);
+      } else {
+        this.handleAdd(event);
+      }
+    } else if (event.keyCode === 27) {
+      if (this.props.isEditMode) {
+        this.cancelEditing();
+      } else {
+        this.setState({ newTask: "" });
+      }
+    }
   };
 
   render() {
@@ -59,7 +82,10 @@ class AddTask extends Component {
         <input
           className="inputarea"
           type="text"
+          name="input"
+          ref={this.inputRef}
           value={this.state[this.props.isEditMode ? "editText" : "newTask"]}
+          onKeyDown={this.handleInputKeyDown}
           onChange={this.props.isEditMode ? this.handleEdit : this.handleInput}
         />
 
@@ -84,7 +110,8 @@ class AddTask extends Component {
 }
 AddTask.propTypes = {
   addNew: PropTypes.func,
-  edit: PropTypes.object,
+  taskToBeEdited: PropTypes.object,
+  isEditMode: PropTypes.bool,
   completeEdit: PropTypes.func,
   cancel: PropTypes.func
 };
