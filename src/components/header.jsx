@@ -1,9 +1,16 @@
-import React, { Component } from "react";
+/* eslint-disable linebreak-style */
+import React, { Component } from 'react';
 
 class Header extends Component {
-  state = {};
+  state = {
+  };
+
   render() {
-    return <h1 className="header">Welcome to Your Task Manager</h1>;
+    return (
+      <h1 className="header">
+        Welcome to Your Task Manager
+      </h1>
+    );
   }
 }
 

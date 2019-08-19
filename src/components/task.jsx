@@ -1,15 +1,29 @@
-import React, { Component } from "react";
+/* eslint-disable linebreak-style */
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class Task extends Component {
   state = {};
+
   render() {
+    const { props } = this;
     return (
       <div>
-        {this.props.value} ID:
-        {this.props.id}
+
+        {props.value}
+        ID:
+        {props.id}
       </div>
     );
   }
 }
+Task.propTypes = {
+  value: PropTypes.string,
+  id: PropTypes.string,
+};
+Task.defaultProps = {
+  value: '',
+  id: 0,
+};
 
 export default Task;

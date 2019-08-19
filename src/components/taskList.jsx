@@ -1,49 +1,58 @@
-import React, { Component } from "react";
-import "bootstrap/dist/css/bootstrap.css";
-import "./toDo.css";
-import PropTypes from "prop-types";
-import Task from "./task";
-class TaskList extends Component {
+/* eslint-disable linebreak-style */
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.css';
+import './toDo.css';
+import PropTypes from 'prop-types';
+import Task from './task';
+
+class TaskList extends React.Component {
   state = {
-    tasks: [],
     confirm: false,
-    current: null
+    currentTaskId: null,
   };
 
-  handleEdit = task => {
-    this.props.editTask(task);
+  handleEdit = (task) => {
+    const { editTask } = this.props;
+    editTask(task);
   };
 
   handleConfirmationWindow = () => {
-    this.setState({ confirm: !this.state.confirm });
+    const { confirm } = this.state;
+    this.setState({ confirm: !confirm });
   };
 
-  handleConfirmationWindowWithTask = task => {
-    this.setState({ current: task, confirm: true });
+  handleConfirmationWindowWithTask = (task) => {
+    this.setState({ currentTaskId: task, confirm: true });
   };
+
   handleDelete = () => {
-    this.props.deleteTask(this.state.current);
+    const { deleteTask } = this.props;
+    const { currentTaskId } = this.state;
+    deleteTask(currentTaskId);
     this.handleConfirmationWindow();
   };
 
   render() {
+    const { enteredTask } = this.props;
+    const { state } = this;
     return (
       <>
-        {this.props.enteredTask.length === 0 && (
+        {enteredTask.length === 0 && (
           <p className="container">You have no task. Please add one</p>
         )}
         <ul className="list">
-          {this.props.enteredTask.map(task => (
+          {enteredTask.map(task => (
             <li key={task.id} className="innerlist">
               <Task value={task.value} id={task.id} />
               <button
                 className="button"
+                type="button"
                 onClick={() => this.handleConfirmationWindowWithTask(task.id)}
               >
                 Delete
               </button>
 
-              <button className="button" onClick={() => this.handleEdit(task)}>
+              <button className="button" type="button" onClick={() => this.handleEdit(task)}>
                 Edit Task
               </button>
 
@@ -51,11 +60,10 @@ class TaskList extends Component {
             </li>
           ))}
         </ul>
-        {this.state.confirm === true && (
+        {state.confirm === true && (
           <div
             className="popup"
             id="exampleModal"
-            //tabindex="-1"
             role="dialog"
             aria-labelledby="exampleModalLabel"
           >
@@ -77,7 +85,7 @@ class TaskList extends Component {
                 </div>
                 <div className="modal-body">
                   <h4>Do you really want to delete this task?</h4>
-                  {<p className="confirm_area">{this.state.current_task}</p>}
+                  {<p className="confirm_area">{enteredTask.find(task => task.id === state.currentTaskId).value}</p>}
                 </div>
                 <div className="modal-footer">
                   <button
@@ -106,10 +114,14 @@ class TaskList extends Component {
 }
 
 TaskList.propTypes = {
-  toggleEdit: PropTypes.func,
   enteredTask: PropTypes.array,
   deleteTask: PropTypes.func,
-  editTask: PropTypes.func
+  editTask: PropTypes.func,
 };
+TaskList.defaultProps = {
 
+  enteredTask: null,
+  deleteTask: undefined,
+  editTask: undefined,
+};
 export default TaskList;

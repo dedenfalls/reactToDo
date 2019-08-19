@@ -1,6 +1,8 @@
-import React, { Component } from "react";
-import "./toDo.css";
-import PropTypes from "prop-types";
+/* eslint-disable linebreak-style */
+import React, { Component } from 'react';
+import './toDo.css';
+import PropTypes from 'prop-types';
+
 class AddTask extends Component {
   constructor(props) {
     super(props);
@@ -9,74 +11,90 @@ class AddTask extends Component {
     this.state = {
       editTextId: null,
 
-      newTask: "",
-      editText: ""
+      newTask: '',
+      editText: '',
     };
-  } /*
-  componentDidUpdate = prevProps => {
+  }
+  /*  componentDidUpdate = prevProps => {
     if (
       this.props.taskToBeEdited !== prevProps.taskToBeEdited &&
       this.props.isEditMode
     ) {
       this.setState({ editText: this.props.taskToBeEdited.value });
     }
-  };*/
-  componentDidMount() {
+  };  */
+
+  componentDidUpdate() {
     this.inputRef.current.focus();
   }
+
   static getDerivedStateFromProps(nextProps, prevState) {
     if (
-      (!prevState.editText ||
-        nextProps.taskToBeEdited.id !== prevState.editTextId) &&
-      nextProps.taskToBeEdited &&
-      nextProps.isEditMode
+      (!prevState.editText
+        || nextProps.taskToBeEdited.id !== prevState.editTextId)
+      && nextProps.taskToBeEdited
+      && nextProps.isEditMode
     ) {
       return {
         editText: nextProps.taskToBeEdited.value,
-        editTextId: nextProps.taskToBeEdited.id
+        editTextId: nextProps.taskToBeEdited.id,
       };
     }
     return null;
   }
-  handleInput = event => {
+
+  handleInput = (event) => {
     this.setState({ newTask: event.target.value });
   };
-  handleEdit = event => {
+
+  handleEdit = (event) => {
     this.setState({ editText: event.target.value });
   };
+
   handleAdd = () => {
-    this.props.addNew(this.state.newTask);
-    this.setState({ newTask: "" });
-    this.inputRef.current.focus();
-  };
-  finishEdit = () => {
-    this.props.completeEdit(this.state.editText);
-    this.setState({ newTask: "", editText: "" });
-    this.inputRef.current.focus();
-  };
-  cancelEditing = () => {
-    this.props.cancel();
-    this.setState({ editText: "" });
+    const { addNew } = this.props;
+    const { newTask } = this.state;
+    addNew(newTask);
+
+    this.setState({ newTask: '' });
     this.inputRef.current.focus();
   };
 
-  handleInputKeyDown = event => {
-    if (event.key === "Enter") {
-      if (this.props.isEditMode) {
+  finishEdit = () => {
+    const { completeEdit } = this.props;
+    const { editText } = this.state;
+    completeEdit(editText);
+    this.setState({ newTask: '', editText: '' });
+    this.inputRef.current.focus();
+  };
+
+  cancelEditing = () => {
+    const { cancel } = this.props;
+    cancel();
+    this.setState({ editText: '' });
+    this.inputRef.current.focus();
+  };
+
+  handleInputKeyDown = (event) => {
+    const { isEditMode } = this.props;
+    if (event.key === 'Enter') {
+      if (isEditMode) {
         this.finishEdit(event);
       } else {
         this.handleAdd(event);
       }
     } else if (event.keyCode === 27) {
-      if (this.props.isEditMode) {
+      if (isEditMode) {
         this.cancelEditing();
       } else {
-        this.setState({ newTask: "" });
+        this.setState({ newTask: '' });
       }
     }
   };
 
   render() {
+    const { state } = this;
+    const { isEditMode } = this.props;
     return (
       <div className="divv">
         <input
@@ -84,23 +102,23 @@ class AddTask extends Component {
           type="text"
           name="input"
           ref={this.inputRef}
-          value={this.state[this.props.isEditMode ? "editText" : "newTask"]}
+          value={state[isEditMode ? 'editText' : 'newTask']}
           onKeyDown={this.handleInputKeyDown}
-          onChange={this.props.isEditMode ? this.handleEdit : this.handleInput}
+          onChange={isEditMode ? this.handleEdit : this.handleInput}
         />
 
-        {!this.props.isEditMode && (
-          <button className="button" onClick={() => this.handleAdd()}>
-            Add Task
-          </button>
-        )}
-        {this.props.isEditMode && (
-          <button className="button" onClick={() => this.finishEdit()}>
+        {isEditMode && (
+          <button className="button" type="button" onClick={() => this.finishEdit()}>
             Edit Task
           </button>
         )}
-        {this.props.isEditMode && (
-          <button className="button" onClick={() => this.cancelEditing()}>
+        {!isEditMode && (
+          <button className="button" type="submit" onClick={() => this.handleAdd()}>
+            Add Task
+          </button>
+        )}
+        {isEditMode && (
+          <button className="button" type="button" onClick={() => this.cancelEditing()}>
             Cancel
           </button>
         )}
@@ -110,10 +128,17 @@ class AddTask extends Component {
 }
 AddTask.propTypes = {
   addNew: PropTypes.func,
-  taskToBeEdited: PropTypes.object,
+  taskToBeEdited: PropTypes,
   isEditMode: PropTypes.bool,
   completeEdit: PropTypes.func,
-  cancel: PropTypes.func
+  cancel: PropTypes.func,
+};
+AddTask.defaultProps = {
+  addNew: undefined,
+  taskToBeEdited: undefined,
+  isEditMode: false,
+  completeEdit: undefined,
+  cancel: undefined,
 };
 
 export default AddTask;
