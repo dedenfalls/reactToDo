@@ -128,7 +128,7 @@ class AddTask extends Component {
 }
 AddTask.propTypes = {
   addNew: PropTypes.func,
-  taskToBeEdited: PropTypes,
+  taskToBeEdited: PropTypes.shape({ id: PropTypes.string, value: PropTypes.string }),
   isEditMode: PropTypes.bool,
   completeEdit: PropTypes.func,
   cancel: PropTypes.func,

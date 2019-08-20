@@ -114,7 +114,7 @@ class TaskList extends React.Component {
 }
 
 TaskList.propTypes = {
-  enteredTask: PropTypes.array,
+  enteredTask: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.string, value: PropTypes.string })),
   deleteTask: PropTypes.func,
   editTask: PropTypes.func,
 };
