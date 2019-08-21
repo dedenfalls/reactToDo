@@ -10,7 +10,6 @@ class AddTask extends Component {
 
     this.state = {
       editTextId: null,
-
       newTask: '',
       editText: '',
     };
@@ -28,13 +27,12 @@ class AddTask extends Component {
     this.inputRef.current.focus();
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     if (
-      (!prevState.editText
-        || nextProps.taskToBeEdited.id !== prevState.editTextId)
-      && nextProps.taskToBeEdited
-      && nextProps.isEditMode
+      nextProps.taskToBeEdited
+      && nextProps.isEditMode && nextProps.newEditRequest
     ) {
+      nextProps.unsetEditRequest();
       return {
         editText: nextProps.taskToBeEdited.value,
         editTextId: nextProps.taskToBeEdited.id,
@@ -48,6 +46,10 @@ class AddTask extends Component {
   };
 
   handleEdit = (event) => {
+    if (event.target.value === '') {
+      this.setState({ editText: event.target.value });
+      return;
+    }
     this.setState({ editText: event.target.value });
   };
 

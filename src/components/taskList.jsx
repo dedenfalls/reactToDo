@@ -4,12 +4,29 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './toDo.css';
 import PropTypes from 'prop-types';
 import Task from './task';
+import db from '../firebase';
 
 class TaskList extends React.Component {
   state = {
+    dbTasks: [],
     confirm: false,
     currentTaskId: null,
   };
+
+  componentDidMount() {
+    //  db.collection('Tasks').get().then(task => task.docs.map(todo => this.setTasks(todo)));
+    db.collection('Tasks').onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          this.setTasks(change.doc.data());
+        } else if (change.type === 'removed') {
+          this.deleteTasks(change.doc.data());
+        } else if (change.type === 'modified') {
+          this.editTasks(change.doc.data());
+        }
+      });
+    });
+  }
 
   handleEdit = (task) => {
     const { editTask } = this.props;
@@ -32,16 +49,37 @@ class TaskList extends React.Component {
     this.handleConfirmationWindow();
   };
 
+  setTasks = (task) => {
+    const { dbTasks } = this.state;
+    if (!dbTasks.includes(task)) {
+      this.setState({ dbTasks: [task, ...dbTasks] });
+    }
+  }
+
+  deleteTasks = (task) => {
+    const { dbTasks } = this.state;
+    const ind = dbTasks.findIndex(element => element.id === task.id);
+    dbTasks.splice(ind, 1);
+    this.setState({ dbTasks });
+  }
+
+  editTasks = (task) => {
+    const { dbTasks } = this.state;
+    const ind = dbTasks.findIndex(element => element.id === task.id);
+    dbTasks[ind].value = task.value;
+    this.setState({ dbTasks });
+  }
+
   render() {
-    const { enteredTask } = this.props;
+    const { dbTasks } = this.state;
     const { state } = this;
     return (
       <>
-        {enteredTask.length === 0 && (
+        {dbTasks.length === 0 && (
           <p className="container">You have no task. Please add one</p>
         )}
         <ul className="list">
-          {enteredTask.map(task => (
+          {dbTasks.map(task => (
             <li key={task.id} className="innerlist">
               <Task value={task.value} id={task.id} />
               <button
@@ -85,7 +123,7 @@ class TaskList extends React.Component {
                 </div>
                 <div className="modal-body">
                   <h4>Do you really want to delete this task?</h4>
-                  {<p className="confirm_area">{enteredTask.find(task => task.id === state.currentTaskId).value}</p>}
+                  {<p className="confirm_area">{dbTasks.find(task => task.id === state.currentTaskId).value}</p>}
                 </div>
                 <div className="modal-footer">
                   <button
@@ -114,13 +152,10 @@ class TaskList extends React.Component {
 }
 
 TaskList.propTypes = {
-  enteredTask: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.string, value: PropTypes.string })),
   deleteTask: PropTypes.func,
   editTask: PropTypes.func,
 };
 TaskList.defaultProps = {
-
-  enteredTask: null,
   deleteTask: undefined,
   editTask: undefined,
 };

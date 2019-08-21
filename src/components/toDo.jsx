@@ -8,14 +8,16 @@ import uuid from 'uuid';
 import AddTask from './addTask';
 import TaskList from './taskList';
 import Header from './header';
+import db from '../firebase';
 
 
 class Todo extends Component {
   state = {
-    tasks: [],
     editMode: false,
     toBeEdited: undefined,
+    newEditRequest: false,
   };
+
 
   toggleEditMode = (mode) => {
     this.setState({ editMode: mode });
@@ -26,18 +28,23 @@ class Todo extends Component {
       alert('Please enter a valid task');
       return;
     }
-    const { tasks } = this.state;
-    this.setState({
-      tasks: [...tasks, { id: uuid(), value: newTaskValue }],
-    });
+    db.collection('Tasks').add({ id: uuid(), value: newTaskValue });
   };
 
   handleDeleteTask = (taskId) => {
-    const { tasks } = this.state;
+    db.collection('Tasks').where('id', '==', taskId).get().then((snapShot) => {
+      if (snapShot.empty) {
+        alert('No Matching Task');
+      } else {
+        db.collection('Tasks').doc(snapShot.docs[0].id).delete();
+      }
+    });
 
-    const ind = tasks.findIndex(element => element.id === taskId);
-    // findIndex
-    tasks.splice(ind, 1);
+    // db.collection('Tasks').where().delete();
+
+
+    // const ind = tasks.findIndex(element => element.id === taskId);
+    // tasks.splice(ind, 1);
     this.setState({
       editMode: false,
     });
@@ -45,30 +52,38 @@ class Todo extends Component {
 
   setEditTask = (task) => {
     //  console.log(`${JSON.stringify(task)} set edit`);
-    this.setState({ toBeEdited: task, editMode: true });
+    this.setState({ toBeEdited: task, editMode: true, newEditRequest: true });
   };
 
   handleEditTask = (taskValue) => {
     if (taskValue !== '') {
       const { toBeEdited } = this.state;
-      const { tasks } = this.state;
-      const newtasksarray = [...tasks];
-      const index = tasks.indexOf(toBeEdited);
-      newtasksarray[index] = { id: toBeEdited.id, value: taskValue };
-      this.setState({ tasks: newtasksarray });
+
+      db.collection('Tasks').where('id', '==', toBeEdited.id).get().then((snapShot) => {
+        if (snapShot.empty) {
+          alert('No Matching Task');
+        } else {
+          db.collection('Tasks').doc(snapShot.docs[0].id).update({ value: taskValue });
+        }
+      });
     } else if (taskValue === '') {
       alert('You entered an empty task');
     }
 
-    this.setState({ toBeEdited: undefined, editMode: false });
+    this.cancelEdit();
   };
 
   cancelEdit = () => {
     this.setState({ toBeEdited: undefined, editMode: false });
   };
 
+  unsetEditRequest = () => {
+    this.setState({ newEditRequest: false });
+  }
+
   render() {
     const { state } = this;
+
     return (
       <React.Fragment>
         <Header />
@@ -78,10 +93,11 @@ class Todo extends Component {
           isEditMode={state.editMode}
           completeEdit={this.handleEditTask}
           cancel={this.cancelEdit}
+          newEditRequest={state.newEditRequest}
+          unsetEditRequest={this.unsetEditRequest}
         />
 
         <TaskList
-          enteredTask={state.tasks}
           deleteTask={this.handleDeleteTask}
           editTask={this.setEditTask}
         />
